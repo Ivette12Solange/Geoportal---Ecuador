@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Mi Base de Datos Espacial de Ecuador ✨</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: #ff6b9d;
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .table-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .table-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .table-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .table-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .table-type {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .table-body {
+            padding: 20px;
+        }
+        
+        .geo-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .geo-item {
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border-radius: 12px;
+            color: #2d3436;
+            font-weight: 500;
+        }
+        
+        .geo-item i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #e17055;
+        }
+        
+        .fields-container {
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ff6b9d #f1f3f4;
+        }
+        
+        .fields-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .fields-container::-webkit-scrollbar-track {
+            background: #f1f3f4;
+            border-radius: 10px;
+        }
+        
+        .fields-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            border-radius: 10px;
+        }
+        
+        .field-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        
+        .field-item:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateX(5px);
+        }
+        
+        .field-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .field-type {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            background: rgba(255, 107, 157, 0.1);
+            border-radius: 12px;
+        }
+        
+        .sparkles {
+            position: fixed;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        .sparkle {
+            position: absolute;
+            background: linear-gradient(45deg, #ff6b9d, #c44569);
+            border-radius: 50%;
+            animation: sparkle 3s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+            100% { opacity: 0; transform: scale(0) rotate(360deg); }
+        }
+        
+        .floating-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .heart {
+            position: absolute;
+            color: rgba(255, 107, 157, 0.3);
+            font-size: 20px;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-hearts" id="hearts"></div>
+    <div class="sparkles" id="sparkles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-heart"></i> Mi Dashboard Espacial <i class="fas fa-heart"></i></h1>
+            <p><i class="fas fa-map-marked-alt"></i> Base de datos geoespacial de Ecuador con PostGIS <i class="fas fa-sparkles"></i></p>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-table"></i></div>
+                <div class="stat-number">16</div>
+                <div class="stat-label">Tablas Espaciales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-map-pin"></i></div>
+                <div class="stat-number">7</div>
+                <div class="stat-label">Capas de Puntos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-shapes"></i></div>
+                <div class="stat-number">7</div>
+                <div class="stat-label">Capas de Polígonos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-route"></i></div>
+                <div class="stat-number">2</div>
+                <div class="stat-label">Capas de Líneas</div>
+            </div>
+        </div>
+        
+        <div class="tables-grid" id="tablesContainer">
+            <!-- Las tablas se generarán dinámicamente -->
+        </div>
+    </div>
+    
+    <script>
+        // Datos de las tablas
+        const tablesData = {
+            "ESTACIONES_MET_INFOANUAL": {
+                type: "POINT",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "nombre de", type: "character varying"},
+                    {name: "1981", type: "numeric"},
+                    {name: "1982", type: "numeric"},
+                    {name: "1983", type: "numeric"},
+                    {name: "1984", type: "numeric"},
+                    {name: "1985", type: "numeric"},
+                    {name: "longitud", type: "numeric"},
+                    {name: "latitud", type: "numeric"}
+                ],
+                description: "Estaciones meteorológicas con información anual histórica"
+            },
+            "Estaciones geodésicas": {
+                type: "POINT",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "codigo", type: "character varying"},
+                    {name: "latitud", type: "numeric"},
+                    {name: "longitud", type: "numeric"}
+                ],
+                description: "Red de estaciones geodésicas del país"
+            },
+            "Estaciones sísmicas": {
+                type: "POINT",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "código", type: "character varying"},
+                    {name: "latitud", type: "numeric"},
+                    {name: "longitud", type: "numeric"},
+                    {name: "red", type: "character varying"},
+                    {name: "datalogger", type: "character varying"},
+                    {name: "sensor mod", type: "character varying"}
+                ],
+                description: "Red de monitoreo sísmico nacional"
+            },
+            "INUNDA2": {
+                type: "MULTIPOLYGON",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "area", type: "double precision"},
+                    {name: "perimeter", type: "double precision"},
+                    {name: "inunda_", type: "bigint"},
+                    {name: "inunda_id", type: "bigint"},
+                    {name: "dxf_text", type: "character varying"},
+                    {name: "arin", type: "numeric"},
+                    {name: "descrip", type: "character varying"}
+                ],
+                description: "Zonas de riesgo por inundación"
+            },
+            "P_SISMO2": {
+                type: "MULTIPOLYGON",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "area", type: "double precision"},
+                    {name: "perimeter", type: "double precision"},
+                    {name: "descrip", type: "character varying"}
+                ],
+                description: "Zonas de peligro sísmico"
+            },
+            "P_VOLC32": {
+                type: "MULTIPOLYGON",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "area", type: "double precision"},
+                    {name: "perimeter", type: "double precision"},
+                    {name: "descrip", type: "character varying"}
+                ],
+                description: "Zonas de peligro volcánico nivel 3"
+            },
+            "aeropuertos": {
+                type: "POINT",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "f_code", type: "character varying"},
+                    {name: "nombre", type: "character varying"},
+                    {name: "uso", type: "character varying"}
+                ],
+                description: "Aeropuertos y pistas de aterrizaje"
+            },
+            "cantones": {
+                type: "MULTIPOLYGON",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "codigo", type: "character varying"},
+                    {name: "first_cant", type: "character varying"},
+                    {name: "first_prov", type: "character varying"},
+                    {name: "area", type: "double precision"}
+                ],
+                description: "División política cantonal del Ecuador"
+            },
+            "parroquias": {
+                type: "MULTIPOLYGON",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "nombre", type: "character varying"},
+                    {name: "canton", type: "character varying"},
+                    {name: "provincia", type: "character varying"},
+                    {name: "area", type: "double precision"}
+                ],
+                description: "División política parroquial del Ecuador"
+            },
+            "poblaciones2": {
+                type: "POINT",
+                fields: [
+                    {name: "id", type: "bigint"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "nombre", type: "character varying"},
+                    {name: "provincia", type: "character varying"},
+                    {name: "pop_2002", type: "bigint"}
+                ],
+                description: "Centros poblados con datos demográficos"
+            },
+            "vias": {
+                type: "MULTILINESTRING",
+                fields: [
+                    {name: "id", type: "integer"},
+                    {name: "geom", type: "USER-DEFINED"},
+                    {name: "nam", type: "character varying"},
+                    {name: "descripcio", type: "character varying"},
+                    {name: "typ_desc", type: "character varying"}
+                ],
+                description: "Red vial nacional del Ecuador"
+            }
+        };
+        
+        // Función para obtener el icono según el tipo de geometría
+        function getGeometryIcon(type) {
+            switch(type) {
+                case 'POINT': return 'fa-map-pin';
+                case 'MULTIPOLYGON': return 'fa-shapes';
+                case 'MULTILINESTRING': return 'fa-route';
+                default: return 'fa-map';
+            }
+        }
+        
+        // Función para generar las tarjetas de tablas
+        function generateTableCards() {
+            const container = document.getElementById('tablesContainer');
+            
+            Object.entries(tablesData).forEach(([tableName, tableInfo]) => {
+                const card = document.createElement('div');
+                card.className = 'table-card';
+                
+                card.innerHTML = `
+                    <div class="table-header">
+                        <div class="table-name">${tableName}</div>
+                        <div class="table-type">
+                            <i class="fas ${getGeometryIcon(tableInfo.type)}"></i>
+                            ${tableInfo.type}
+                        </div>
+                    </div>
+                    <div class="table-body">
+                        <div class="geo-info">
+                            <div class="geo-item">
+                                <i class="fas fa-columns"></i>
+                                ${tableInfo.fields.length} campos
+                            </div>
+                            <div class="geo-item">
+                                <i class="fas fa-globe"></i>
+                                SRID 4326
+                            </div>
+                        </div>
+                        <div class="fields-container">
+                            ${tableInfo.fields.map(field => `
+                                <div class="field-item">
+                                    <span class="field-name">${field.name}</span>
+                                    <span class="field-type">${field.type.split(' ')[0]}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+        
+        // Función para crear corazones flotantes
+        function createFloatingHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            
+            setInterval(() => {
+                if (document.querySelectorAll('.heart').length < 10) {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.innerHTML = '💖';
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    heart.style.animationDelay = Math.random() * 2 + 's';
+                    heartsContainer.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        if (heart.parentNode) {
+                            heart.parentNode.removeChild(heart);
+                        }
+                    }, 6000);
+                }
+            }, 2000);
+        }
+        
+        // Función para crear brillos
+        function createSparkles() {
+            const sparklesContainer = document.getElementById('sparkles');
+            
+            setInterval(() => {
+                if (document.querySelectorAll('.sparkle').length < 15) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.style.left = Math.random() * 100 + 'vw';
+                    sparkle.style.top = Math.random() * 100 + 'vh';
+                    sparkle.style.width = (Math.random() * 4 + 2) + 'px';
+                    sparkle.style.height = sparkle.style.width;
+                    sparkle.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    sparkle.style.animationDelay = Math.random() + 's';
+                    sparklesContainer.appendChild(sparkle);
+                    
+                    setTimeout(() => {
+                        if (sparkle.parentNode) {
+                            sparkle.parentNode.removeChild(sparkle);
+                        }
+                    }, 3000);
+                }
+            }, 1000);
+        }
+        
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            generateTableCards();
+            createFloatingHearts();
+            createSparkles();
+        });
+    </script>
+</body>
+</html>
